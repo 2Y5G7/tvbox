@@ -1,0 +1,55 @@
+name: Sync py folder from FGBLH/HKL
+
+on:
+  schedule:
+    # 每天 UTC 00:00 运行（北京时间 08:00），可按需修改
+    - cron: '0 0 * * *'
+  workflow_dispatch: {}  # 允许手动触发
+
+# 需要写权限才能提交/推送变更
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout target repo (this repo)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Sparse-checkout source repo's py folder
+        run: |
+          set -e
+          git clone --depth 1 --filter=blob:none --sparse https://github.com/FGBLH/HKL.git source-repo
+          cd source-repo
+          git sparse-checkout set py
+          cd ..
+
+      - name: Sync files into target repo
+        run: |
+          set -e
+          # 目标目录：本仓库中的 py 文件夹（可自行修改路径）
+          TARGET_DIR="py"
+          mkdir -p "$TARGET_DIR"
+
+          # --delete 保证与源文件夹内容完全一致（多余文件会被删除）
+          rsync -av --delete source-repo/py/ "$TARGET_DIR/"
+
+          # 清理临时克隆的源仓库目录
+          rm -rf source-repo
+
+      - name: Commit and push changes if any
+        run: |
+          set -e
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          if [ -n "$(git status --porcelain)" ]; then
+            git add py
+            git commit -m "chore: sync py folder from FGBLH/HKL ($(date -u +'%Y-%m-%d'))"
+            git push
+          else
+            echo "No changes to commit."
+          fi
