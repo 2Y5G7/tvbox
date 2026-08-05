@@ -1,0 +1,37 @@
+name: Sync HKL/py and Sort
+
+on:
+  schedule:
+    - cron: "0 0 * * *"   # 每天 UTC 0点执行（北京时间早8点）
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout your repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Sync & sort
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python scripts/sync_and_sort.py
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add synced/
+          git diff --staged --quiet || git commit -m "chore: sync HKL/py $(date -u +'%Y-%m-%d')"
+          git push
