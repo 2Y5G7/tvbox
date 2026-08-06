@@ -1,0 +1,16 @@
+{
+  "sites": [
+    {
+      "key": "Jable",
+      "name": "Jable",
+      "type": 3,
+      "api": "https://raw.githubusercontent.com/2Y5G7/tvbox/refs/heads/main/star/Jable.py"
+    },
+    {
+      "key": "haijiao",
+      "name": "海角",
+      "type": 3,
+      "api": "https://raw.githubusercontent.com/2Y5G7/tvbox/refs/heads/main/star/%E6%B5%B7%E8%A7%92%E7%A4%BE%E5%8C%BA.py"
+    }
+  ]
+}
