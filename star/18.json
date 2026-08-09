@@ -11,24 +11,6 @@
       "name": "jable",
       "type": 3,
       "api": "https://raw.githubusercontent.com/2Y5G7/tvbox/refs/heads/main/star/jable.py"
-    },
-    {
-      "key": "avtoday",
-      "name": "avtoday",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/2Y5G7/tvbox/refs/heads/main/star/avtoday.py"
-    },
-    {
-      "key": "mitao",
-      "name": "mitao",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/2Y5G7/tvbox/refs/heads/main/star/mitao.py"
-    },
-    {
-      "key": "fulao2",
-      "name": "fulao2",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/2Y5G7/tvbox/refs/heads/main/star/fulao2.py"
     }
   ]
 }
