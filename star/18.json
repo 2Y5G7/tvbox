@@ -16,11 +16,5 @@
         "name": "jable",
         "type": 3,
         "api": "https://raw.githubusercontent.com/2Y5G7/tvbox/refs/heads/main/star/jable.py"
-    },
-    {
-        "key": "123AV",
-        "name": "123AV",
-        "type": 3,
-        "api": "https://raw.githubusercontent.com/2Y5G7/tvbox/refs/heads/main/star/123AV.py"
     }]
 }
