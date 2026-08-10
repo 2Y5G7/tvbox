@@ -39,6 +39,28 @@ SEED_B64 = "bW9uZ29kYjovL2FkbWluOlMzY1VyM19QNHNzXzIwMjZANi45MC4xMC4xOToyNzAxNy9h
 # 短视频分类 特殊 id（走全站视频流 type=7&nodeId=0）
 SHORT_VID = "__short__"
 
+# ---------- 海角加密封面本地解密（替代 CF Worker 远端反代） ----------
+# 定制 Base64 字母表(含 * 和 #), 算法源自前端 function w().decode() (见 海角图片.py)
+HJ_IMG_ALPHA = "ABCD*EFGHIJKLMNOPQRSTUVWX#YZabcdefghijklmnopqrstuvwxyz1234567890"
+
+# 全量视频分类（实测 2026-08-09: /api/topic/nodes 全量 + hasVideo 密度扫描）
+# 高密度视频类 + 用户关注类
+HJ_CLASSES = [
+    {"type_id": SHORT_VID, "type_name": "短视频"},
+    {"type_id": "13", "type_name": "海角视频"},
+    {"type_id": "1001", "type_name": "收费视频"},
+    {"type_id": "972", "type_name": "销魂视频"},
+    {"type_id": "973", "type_name": "激情时刻"},
+    {"type_id": "971", "type_name": "耳目盛宴"},
+    {"type_id": "999", "type_name": "福利姬"},
+    {"type_id": "77", "type_name": "神州楼凤"},
+    {"type_id": "36", "type_name": "神州"},
+    {"type_id": "217", "type_name": "绿帽影视"},
+    {"type_id": "258", "type_name": "大事纪实"},
+    {"type_id": "1288", "type_name": "伦理之爱"},
+    {"type_id": "300", "type_name": "海角认证"},
+]
+
 
 class Spider(BaseSpider):
     def init(self, e=""):
@@ -52,7 +74,8 @@ class Spider(BaseSpider):
         self.proxy_port = 0
         self._login_done = False
         self.auth_headers = {}
-        self._start_proxy()
+        # 注意: 不再无条件 _start_proxy()——优先 getProxyUrl()+localProxy (引擎回调,
+        # 无需自建 server); 只有引擎不提供 getProxyUrl 时才惰性启动自建 server (_proxy_url 回退)。
         # 自动登录 (获取 X-User-Token / X-User-Id, 用于解锁需认证的视频)
         if HJ_USER and HJ_PASS:
             self._login()
@@ -156,6 +179,45 @@ class Spider(BaseSpider):
 
     # ---------- 列表解析 ----------
 
+    @staticmethod
+    def _hj_decode(ct):
+        """海角定制 base64 解密 -> data URI 字符串(data:image/jpeg;base64,<b64>)"""
+        n = re.sub(r"[^A-Za-z0-9\*\#]", "", ct)
+        alpha = HJ_IMG_ALPHA
+        chars = []
+        d = 0
+        L = len(n)
+        while d < L:
+            o = alpha.index(n[d]); d += 1
+            r = alpha.index(n[d]); d += 1
+            if d >= L:
+                s = 0; c = 64
+            else:
+                s = alpha.index(n[d]); d += 1
+                if d >= L:
+                    c = 64
+                else:
+                    c = alpha.index(n[d]); d += 1
+            chars.append(chr(o << 2 | r >> 4))
+            if s != 64:
+                chars.append(chr(((15 & r) << 4) | (s >> 2)))
+            if c != 64:
+                chars.append(chr(((3 & s) << 6) | c))
+        return "".join(chars)
+
+    def _hj_fetch_image_bytes(self, real_url):
+        """下载 .txt 密文 -> 定制 base64 解密 -> 返回真实 JPEG bytes"""
+        res = self.session.get(real_url, headers=self.headers, timeout=15)
+        ct = res.content.decode("utf-8", "replace").strip()
+        out = self._hj_decode(ct)
+        if "base64," in out:
+            b64 = out.split("base64,")[-1].strip()
+            # data URI 末尾偶带 \x00, 过滤非 base64 字符再解码(避免 b64decode 报错)
+            b64 = re.sub(r"[^A-Za-z0-9+/=]", "", b64)
+            img = base64.b64decode(b64)
+            return "image/jpeg", img
+        return "text/plain", ct
+
     def _fix_pic(self, url):
         if not url:
             return ""
@@ -163,6 +225,15 @@ class Spider(BaseSpider):
             url = "https:" + url
         elif url.startswith("/"):
             url = self.host + url
+        # 是 .txt 密文 → 走引擎标准 getProxyUrl()+localProxy 回调本地解密
+        # (替代原 CF Worker 远端反代)
+        if url.endswith(".txt"):
+            base = self.getProxyUrl() if hasattr(self, "getProxyUrl") else ""
+            if not base:
+                return url   # 拿不到代理地址, 返回原地址(封面空白, 不影响播放)
+            b64 = base64.b64encode(url.encode("utf-8")).decode("utf-8")
+            sep = "&" if "?" in base else "?"
+            return base + sep + "type=hjimg&url=" + quote(b64, safe="")
         return url
 
     def _clean_title(self, raw):
@@ -184,8 +255,13 @@ class Spider(BaseSpider):
                     continue
                 pic = ""
                 for a in (r.get("attachments") or []):
-                    if a.get("category") == "images" and a.get("remoteUrl"):
-                        pic = a["remoteUrl"]
+                    # coverUrl 优先（video 类附件的封面字段）
+                    u = a.get("coverUrl") or ""
+                    # images 类附件用 remoteUrl 当封面
+                    if not u and a.get("category") == "images" and a.get("remoteUrl"):
+                        u = a["remoteUrl"]
+                    if u:
+                        pic = u
                         break
                 if not pic:
                     pic = H + "/images/common/project/favicon.ico"
@@ -420,7 +496,14 @@ class Spider(BaseSpider):
         self._proxy_started = True
 
     def _proxy_url(self, url):
-        return "http://127.0.0.1:%d/%s" % (self.proxy_port, quote(url, safe=""))
+        """本地代理地址生成：走引擎标准 getProxyUrl()+localProxy 回调（type=stream: m3u8/key）。
+        引擎标准下 getProxyUrl() 必有动态端口；拿不到时返回原地址（封面空白/播放直连, 不建自建 server）"""
+        base = self.getProxyUrl() if hasattr(self, "getProxyUrl") else ""
+        if not base:
+            return url
+        b64 = base64.b64encode(url.encode("utf-8")).decode("utf-8")
+        sep = "&" if "?" in base else "?"
+        return base + sep + "type=stream&url=" + quote(b64, safe="")
 
     def _fetch_m3u8(self, m3u8_url):
         """抓原 m3u8 → 清洗 → key URI 重写为本地代理 → 分片绝对化直连"""
@@ -452,20 +535,7 @@ class Spider(BaseSpider):
 
     def homeContent(self, filter=False):
         try:
-            # 实测视频分类白名单（按 hasVideo 密度筛选，2026-08-06 实测）
-            # 排除纯文本/讨论/楼凤/小说/公告等无视频分类，避免点进去空白
-            classes = [
-                {"type_id": SHORT_VID, "type_name": "短视频"},
-                {"type_id": "13", "type_name": "海角视频"},
-                {"type_id": "1001", "type_name": "收费视频"},
-                {"type_id": "972", "type_name": "销魂视频"},
-                {"type_id": "973", "type_name": "激情时刻"},
-                {"type_id": "971", "type_name": "耳目盛宴"},
-                {"type_id": "258", "type_name": "大事纪实"},
-                {"type_id": "999", "type_name": "福利姬"},
-                {"type_id": "300", "type_name": "海角认证"},
-            ]
-            return {"class": classes}
+            return {"class": HJ_CLASSES}
         except Exception as e:
             print("[HJ] homeContent:", e)
             return {"class": self._fallback_classes()}
@@ -511,8 +581,11 @@ class Spider(BaseSpider):
             title = self._clean_title(detail.get("title", ""))
             pic = ""
             for a in (detail.get("attachments") or []):
-                if a.get("category") == "images" and a.get("remoteUrl"):
-                    pic = self._fix_pic(a["remoteUrl"])
+                u = a.get("coverUrl") or ""
+                if not u and a.get("category") == "images" and a.get("remoteUrl"):
+                    u = a["remoteUrl"]
+                if u:
+                    pic = self._fix_pic(u)
                     break
             desc = self._clean_title(detail.get("liteContent", "")) or ""
             content_raw = detail.get("content", "")
@@ -586,16 +659,39 @@ class Spider(BaseSpider):
             return {"list": [], "page": 1}
 
     def localProxy(self, param):
-        """TVBox 标准 localProxy 兜底（主路径走自建 HTTP 代理）"""
+        """TVBox 标准 localProxy: 封面(type=hjimg→本地解密) + 播放(type=stream/透传 m3u8·key)
+        getProxyUrl 路径下引擎把上述两种地址都回调到这里分派"""
         try:
-            url = unquote(param.get("url", ""))
+            if isinstance(param, dict):
+                ptype = param.get("type", "")
+                p_url = param.get("url", "")
+            else:
+                # 兼容旧调用: 把整个 param 当 url 串
+                ptype = ""
+                p_url = param or ""
+            # ---- 封面: type=hjimg, url=base64(密文.txt地址) -> 本地解密返回 JPEG ----
+            if ptype == "hjimg":
+                try:
+                    real = base64.b64decode(unquote(p_url)).decode("utf-8")
+                except Exception:
+                    real = unquote(p_url) or p_url
+                mime, data = self._hj_fetch_image_bytes(real)
+                return [200, mime, data, {"Content-Length": str(len(data))}]
+            # ---- 播放: type=stream 或自建 server 透传 ----
+            if ptype == "stream":
+                url = base64.b64decode(unquote(p_url)).decode("utf-8")
+            else:
+                url = unquote(p_url) or p_url
             if ".m3u8" in url:
                 text = self._fetch_m3u8(url)
-                return [200, "application/vnd.apple.mpegurl", text.encode("utf-8")]
+                data = text.encode("utf-8")
+                return [200, "application/vnd.apple.mpegurl", data, {"Content-Length": str(len(data))}]
             if ".key" in url or "enc_" in url:
-                return [200, "application/octet-stream", self._fetch_key(url)]
+                data = self._fetch_key(url)
+                return [200, "application/octet-stream", data, {"Content-Length": str(len(data))}]
             r = self.session.get(url, headers=self.headers, timeout=20)
-            return [200, r.headers.get("Content-Type", "application/octet-stream"), r.content]
+            ct = r.headers.get("Content-Type", "application/octet-stream")
+            return [200, ct, r.content, {"Content-Length": str(len(r.content))}]
         except Exception as e:
             return [500, "text/plain", str(e).encode("utf-8")]
 
