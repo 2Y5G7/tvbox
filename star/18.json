@@ -13,6 +13,12 @@
       "api": "https://raw.githubusercontent.com/2Y5G7/tvbox/refs/heads/main/star/haijiao.py"
     },
     {
+      "key": "hdmgdj",
+      "name": "黄豆短剧",
+      "type": 3,
+      "api": "https://raw.githubusercontent.com/2Y5G7/tvbox/refs/heads/main/star/hdmgdj.py"
+    },
+    {
       "key": "sex8",
       "name": "杏吧",
       "type": 1,
