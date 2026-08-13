@@ -1,32 +1,49 @@
 {
-    "sites": [{
-        "key": "vod",
-        "name": "vod",
-        "type": 3,
-        "api": "https://raw.githubusercontent.com/2Y5G7/tvbox/refs/heads/main/star/vod.py"
+  "wallpaper": "https://www.loliapi.com/acg/",
+  "sites": [
+    {
+      "key": "sex8",
+      "name": "杏吧",
+      "type": 1,
+      "api": "https://json.xingba222.com/api.php/provide/vod/",
+      "searchable": 1,
+      "filterable": 1
     },
     {
-        "key": "vod18",
-        "name": "vod18",
-        "type": 3,
-        "api": "https://raw.githubusercontent.com/2Y5G7/tvbox/refs/heads/main/star/vod18.py"
+      "key": "haijiao",
+      "name": "海角",
+      "type": 3,
+      "api": "https://raw.githubusercontent.com/2Y5G7/tvbox/refs/heads/main/star/haijiao.py",
+      "searchable": 1,
+      "filterable": 1
     },
     {
-        "key": "haijiao",
-        "name": "haijiao",
-        "type": 3,
-        "api": "https://raw.githubusercontent.com/2Y5G7/tvbox/refs/heads/main/star/haijiao.py"
+      "key": "missav",
+      "name": "MISSAV",
+      "type": 3,
+      "api": "https://raw.githubusercontent.com/2Y5G7/tvbox/refs/heads/main/star/missav.py",
+      "searchable": 1,
+      "filterable": 1
     },
     {
-        "key": "missav",
-        "name": "missav",
-        "type": 3,
-        "api": "https://raw.githubusercontent.com/2Y5G7/tvbox/refs/heads/main/star/missav.js"
-    },
+      "key": "missav",
+      "name": "Jable",
+      "type": 3,
+      "api": "https://raw.githubusercontent.com/2Y5G7/tvbox/refs/heads/main/star/jable.py",
+      "searchable": 1,
+      "filterable": 1
+    }
+  ],
+  "parses": [
     {
-        "key": "jable",
-        "name": "jable",
-        "type": 3,
-        "api": "https://raw.githubusercontent.com/2Y5G7/tvbox/refs/heads/main/star/jable.py"
-    }]
+      "name": "m3u8",
+      "type": 1,
+      "url": "https://xbxbw888.com/?url=",
+      "ext": {
+        "flag": [
+          "s8m3u8"
+        ]
+      }
+    }
+  ]
 }
