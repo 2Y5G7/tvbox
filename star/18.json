@@ -1,5 +1,11 @@
 {
     "sites": [{
+        "key": "vod",
+        "name": "vod",
+        "type": 3,
+        "api": "https://raw.githubusercontent.com/2Y5G7/tvbox/refs/heads/main/star/vod.py"
+    },
+    {
         "key": "haijiao",
         "name": "haijiao",
         "type": 3,
