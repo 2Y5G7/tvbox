@@ -1,40 +1,39 @@
 {
   "sites": [
     {
-      "key": "missav",
-      "name": "missav",
+      "key": "javfree",
+      "name": "javfree",
       "type": 3,
-      "api": "https://raw.githubusercontent.com/2Y5G7/tvbox/refs/heads/main/star/missav.py"
+      "api": "https://raw.githubusercontent.com/2Y5G7/tvbox/refs/heads/main/star/javfree.py",
+      "quickSearch": 0
     },
     {
       "key": "haijiao",
       "name": "haijiao",
       "type": 3,
-      "api": "https://raw.githubusercontent.com/2Y5G7/tvbox/refs/heads/main/star/haijiao.py"
-    },
-    {
-      "key": "4kporno",
-      "name": "4kporno",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/2Y5G7/tvbox/refs/heads/main/star/4kporno.py"
-    },
-    {
-      "key": "sex8",
-      "name": "sex8",
-      "type": 1,
-      "api": "https://json.xingba222.com/api.php/provide/vod/"
-    },
-    {
-      "key": "javfree",
-      "name": "javfree",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/2Y5G7/tvbox/refs/heads/main/star/javfree.py"
+      "api": "https://raw.githubusercontent.com/2Y5G7/tvbox/refs/heads/main/star/haijiao.py",
+      "quickSearch": 0
     },
     {
       "key": "jable",
       "name": "jable",
       "type": 3,
-      "api": "https://raw.githubusercontent.com/2Y5G7/tvbox/refs/heads/main/star/jable.py"
+      "api": "https://raw.githubusercontent.com/2Y5G7/tvbox/refs/heads/main/star/jable.py",
+      "quickSearch": 0
+    },
+    {
+      "key": "sex8",
+      "name": "sex8",
+      "type": 1,
+      "api": "https://json.xingba222.com/api.php/provide/vod/",
+      "quickSearch": 0
+    },
+    {
+      "key": "missav",
+      "name": "missav",
+      "type": 3,
+      "api": "https://raw.githubusercontent.com/2Y5G7/tvbox/refs/heads/main/star/missav.py",
+      "quickSearch": 0
     }
   ],
   "parses": [
