@@ -2,7 +2,7 @@
   "sites": [
     {
       "key": "missav",
-      "name": "MISSAV",
+      "name": "missav",
       "type": 3,
       "api": "https://raw.githubusercontent.com/2Y5G7/tvbox/refs/heads/main/star/missav.py"
     },
@@ -20,7 +20,7 @@
     },
     {
       "key": "sex8",
-      "name": "杏吧",
+      "name": "sex8",
       "type": 1,
       "api": "https://json.xingba222.com/api.php/provide/vod/"
     },
@@ -32,7 +32,7 @@
     },
     {
       "key": "jable",
-      "name": "Jable",
+      "name": "jable",
       "type": 3,
       "api": "https://raw.githubusercontent.com/2Y5G7/tvbox/refs/heads/main/star/jable.py"
     }
