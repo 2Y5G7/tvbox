@@ -25,6 +25,12 @@
       "api": "https://json.xingba222.com/api.php/provide/vod/"
     },
     {
+      "key": "javfree",
+      "name": "javfree",
+      "type": 3,
+      "api": "https://raw.githubusercontent.com/2Y5G7/tvbox/refs/heads/main/star/javfree.py"
+    },
+    {
       "key": "jable",
       "name": "Jable",
       "type": 3,
