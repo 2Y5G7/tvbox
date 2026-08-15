@@ -1,0 +1,103 @@
+name: Sync Spider Files
+
+on:
+  schedule:
+    # 每天 UTC 0:00 运行（北京时间 8:00），按需修改
+    - cron: '0 0 * * *'
+  workflow_dispatch: {}  # 允许手动触发，方便调试
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 当前仓库
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Checkout 源仓库
+        uses: actions/checkout@v4
+        with:
+          # 修改为你要同步的源仓库
+          repository: uuy988/fgh998
+          ref: main   # 按需修改分支名
+          path: source-repo
+
+      - name: 同步 js/py 文件到 spider 目录（排除文件名含 hshsjk9）
+        run: |
+          mkdir -p spider
+
+          # 递归查找所有 .js 和 .py 文件，排除文件名包含 hshsjk9 的
+          find source-repo -type f \( -name "*.js" -o -name "*.py" \) \
+            ! -name "*hshsjk9*" -print0 | while IFS= read -r -d '' file; do
+              filename=$(basename "$file")
+              dest="spider/$filename"
+
+              # 如果目标已存在同名但不同来源的文件，做个提示（不会覆盖失败，直接覆盖为最新内容）
+              cp "$file" "$dest"
+          done
+
+          echo "本次同步文件列表："
+          find source-repo -type f \( -name "*.js" -o -name "*.py" \) ! -name "*hshsjk9*"
+
+      - name: 生成 TVBox 配置 (18.json)
+        env:
+          # 用于拼接 raw 直链，格式：GH_OWNER/GH_REPO@BRANCH
+          # 修改为你自己（当前仓库）的 owner/repo 和分支
+          RAW_BASE: https://raw.githubusercontent.com/2Y5G7/tvbox/main/spider
+        run: |
+          python3 - "$RAW_BASE" <<'PYEOF'
+          import json
+          import os
+          import sys
+
+          raw_base = sys.argv[1].rstrip("/")
+          spider_dir = "spider"
+
+          # 可选：仓库根目录放一份 name-map.json 自定义显示名称
+          # 格式：{"文件名不含后缀": "自定义显示名称"}
+          # 找不到映射时，回退使用文件名本身
+          name_map = {}
+          if os.path.exists("name-map.json"):
+              with open("name-map.json", "r", encoding="utf-8") as f:
+                  name_map = json.load(f)
+
+          sites = []
+          for filename in sorted(os.listdir(spider_dir)):
+              if not (filename.endswith(".py") or filename.endswith(".js")):
+                  continue
+              # key 用文件名（不含后缀）作为唯一标识；如需去重可自行调整
+              key = os.path.splitext(filename)[0]
+              display_name = name_map.get(key, key)
+              sites.append({
+                  "key": key,
+                  "name": display_name,
+                  "type": 3,
+                  "api": f"{raw_base}/{filename}"
+              })
+
+          config = {"sites": sites}
+
+          with open("18.json", "w", encoding="utf-8") as f:
+              json.dump(config, f, ensure_ascii=False, indent=2)
+
+          print(f"共生成 {len(sites)} 个源，写入 18.json")
+          PYEOF
+
+      - name: 提交并推送变更
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add spider/ 18.json
+
+          # 只有存在改动时才提交，避免空提交
+          if git diff --cached --quiet; then
+            echo "没有文件变化，跳过提交"
+          else
+            git commit -m "chore: 自动同步 spider 文件并更新 18.json $(date -u +'%Y-%m-%d %H:%M UTC')"
+            git push
+          fi
