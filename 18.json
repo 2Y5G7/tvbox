@@ -1,6 +1,12 @@
 {
   "sites": [
     {
+      "key": "腾爱优b站",
+      "name": "腾爱优b站",
+      "type": 3,
+      "api": "https://raw.githubusercontent.com/2Y5G7/tvbox/main/spider/腾爱优b站.js"
+    },
+    {
       "key": "777午夜影院🔞",
       "name": "777午夜影院🔞",
       "type": 3,
@@ -311,12 +317,6 @@
       "name": "糖心Vlog网页🔞",
       "type": 3,
       "api": "https://raw.githubusercontent.com/2Y5G7/tvbox/main/spider/糖心Vlog网页🔞.py"
-    },
-    {
-      "key": "腾爱优b站",
-      "name": "腾爱优b站",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/2Y5G7/tvbox/main/spider/腾爱优b站.js"
     },
     {
       "key": "草榴社区🔞",
