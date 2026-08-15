@@ -65,10 +65,15 @@ jobs:
               with open("name-map.json", "r", encoding="utf-8") as f:
                   name_map = json.load(f)
 
+          filenames = [
+              f for f in os.listdir(spider_dir)
+              if f.endswith(".py") or f.endswith(".js")
+          ]
+          # 排序规则：文件名不含 🔞 的排前面，含 🔞 的排后面；组内再按文件名字典序
+          filenames.sort(key=lambda f: ("🔞" in f, f))
+
           sites = []
-          for filename in sorted(os.listdir(spider_dir)):
-              if not (filename.endswith(".py") or filename.endswith(".js")):
-                  continue
+          for filename in filenames:
               # key 用文件名（不含后缀）作为唯一标识；如需去重可自行调整
               key = os.path.splitext(filename)[0]
               display_name = name_map.get(key, key)
