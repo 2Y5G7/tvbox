@@ -28,7 +28,7 @@
       "key": "missav",
       "name": "missav",
       "type": 3,
-      "api": "https://raw.githubusercontent.com/2Y5G7/tvbox/refs/heads/main/star/missav.py"  
+      "api": "https://raw.githubusercontent.com/2Y5G7/tvbox/refs/heads/main/star/missav.js"  
     }
   ],
   "parses": [
