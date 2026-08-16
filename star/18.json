@@ -1,16 +1,16 @@
 {
   "sites": [
     {
-      "key": "javfree",
-      "name": "javfree",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/2Y5G7/tvbox/refs/heads/main/star/javfree.py"
-    },
-    {
       "key": "haijiao",
       "name": "haijiao",
       "type": 3,
       "api": "https://raw.githubusercontent.com/2Y5G7/tvbox/refs/heads/main/star/haijiao.py"
+    },
+    {
+      "key": "missav",
+      "name": "missav",
+      "type": 3,
+      "api": "https://raw.githubusercontent.com/2Y5G7/tvbox/refs/heads/main/star/missav.js"  
     },
     {
       "key": "jable",
@@ -23,12 +23,6 @@
       "name": "sex8",
       "type": 1,
       "api": "https://json.xingba222.com/api.php/provide/vod/"
-    },
-    {
-      "key": "missav",
-      "name": "missav",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/2Y5G7/tvbox/refs/heads/main/star/missav.js"  
     }
   ],
   "parses": [
