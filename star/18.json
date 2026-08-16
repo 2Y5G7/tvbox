@@ -11,30 +11,6 @@
       "name": "missav",
       "type": 3,
       "api": "https://raw.githubusercontent.com/2Y5G7/tvbox/refs/heads/main/star/missav.js"  
-    },
-    {
-      "key": "jable",
-      "name": "jable",
-      "type": 3,
-      "api": "https://raw.githubusercontent.com/2Y5G7/tvbox/refs/heads/main/star/jable.py"
-    },
-    {
-      "key": "sex8",
-      "name": "sex8",
-      "type": 1,
-      "api": "https://json.xingba222.com/api.php/provide/vod/"
-    }
-  ],
-  "parses": [
-    {
-      "name": "m3u8",
-      "type": 1,
-      "url": "https://xbxbw888.com/?url=",
-      "ext": {
-        "flag": [
-          "s8m3u8"
-        ]
-      }
     }
   ]
 }
