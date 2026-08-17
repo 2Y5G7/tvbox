@@ -1,0 +1,65 @@
+name: Sync common.json from FGBLH/HKL
+
+on:
+  schedule:
+    # cron 是 UTC 时间，北京时间 6:00 = UTC 前一天 22:00
+    - cron: '0 22 * * *'
+  workflow_dispatch: {}  # 允许手动触发，方便调试
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 本仓库
+        uses: actions/checkout@v4
+        with:
+          path: main-repo
+
+      - name: Checkout FGBLH/HKL 源仓库
+        uses: actions/checkout@v4
+        with:
+          repository: FGBLH/HKL
+          ref: main
+          path: source-repo
+
+      - name: 查找并复制目标文件到 common.json
+        run: |
+          set -e
+          cd source-repo
+
+          # 在源仓库根目录（顶层）查找文件名同时包含 "ok" 和 "常规" 的文件
+          matches=$(find . -maxdepth 1 -type f -name "*ok*常规*" -o -maxdepth 1 -type f -name "*常规*ok*")
+
+          count=$(echo "$matches" | grep -c . || true)
+
+          if [ "$count" -eq 0 ]; then
+            echo "::error::未找到文件名同时包含 'ok' 和 '常规' 的文件"
+            exit 1
+          fi
+
+          if [ "$count" -gt 1 ]; then
+            echo "::error::找到多个匹配文件，预期只有一个："
+            echo "$matches"
+            exit 1
+          fi
+
+          target_file="$matches"
+          echo "找到目标文件: $target_file"
+
+          mkdir -p ../main-repo/star
+          cp "$target_file" ../main-repo/star/common.json
+
+      - name: 提交并推送变更（如有变化）
+        run: |
+          cd main-repo
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          if git diff --quiet -- star/common.json; then
+            echo "没有变化，跳过提交"
+            exit 0
+          fi
+
+          git add star/common.json
+          git commit -m "chore: sync star/common.json from FGBLH/HKL ($(date -u +'%Y-%m-%d'))"
+          git push
