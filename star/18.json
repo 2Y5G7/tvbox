@@ -1,0 +1,35 @@
+{
+  "sites": [
+    {
+      "key": "sex8zy",
+      "name": "杏吧资源",
+      "type": 1,
+      "api": "https://sex8zy.com/api.php/provide/vod/",
+      "playUrl": "https://xbxbw888.com/?url="
+    },
+    {
+      "key": "yuanlib",
+      "name": "免费资源站",
+      "type": 1,
+      "api": "https://yuanlib.com/api.php/provide/vod/?ac=list"
+    },
+    {
+      "key": "haijiao",
+      "name": "海角",
+      "type": 3,
+      "api": "https://raw.githubusercontent.com/2Y5G7/tvbox/refs/heads/main/star/haijiao.py"
+    }
+  ],
+  "parses": [
+    {
+      "name": "杏吧资源",
+      "type": 1,
+      "url": "https://xbxbw888.com/?url=",
+      "ext": {
+        "flag": [
+          "s8m3u8"
+        ]
+      }
+    }
+  ]
+}
